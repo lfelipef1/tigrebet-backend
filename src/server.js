@@ -97,6 +97,8 @@ app.get('/api/v1/health', async (req, res) => {
 // Auth routes (public)
 app.post('/api/v1/register', authLimiter, validate(registerSchema), authController.register);
 app.post('/api/v1/login', authLimiter, validate(loginSchema), authController.login);
+app.post('/api/v1/auth/forgot-password', authLimiter, authController.forgotPassword);
+app.post('/api/v1/auth/reset-password', authLimiter, authController.resetPassword);
 
 // Payment webhook — public (MercadoPago calls this directly)
 app.post('/api/v1/payment/webhook/mercadopago', paymentController.receiveWebhook);

@@ -1,6 +1,8 @@
+const crypto = require('crypto');
 const { User, Transaction } = require('../models');
 const { generateRefCode, generateAccessToken } = require('../utils/crypto');
 const { comparePassword } = require('../utils/hash');
+const { sendResetPasswordEmail } = require('../services/emailService');
 const logger = require('../config/logger');
 
 const register = async (req, res, next) => {
@@ -187,4 +189,58 @@ const registerCheck = async (req, res, next) => {
   }
 };
 
-module.exports = { register, login, registerCheck };
+const forgotPassword = async (req, res, next) => {
+  try {
+    const { mobile } = req.body;
+    if (!mobile) return res.status(400).json({ code: 400, msg: 'Celular é obrigatório' });
+
+    const user = await User.findOne({ where: { mobile } });
+
+    // Always return success to prevent enumeration
+    if (!user || !user.email) {
+      return res.json({ code: 200, msg: 'Se este número tiver email cadastrado, você receberá o link em breve.' });
+    }
+
+    const token = crypto.randomBytes(32).toString('hex');
+    const expires = new Date(Date.now() + 60 * 60 * 1000); // 1 hora
+
+    await user.update({ resetPasswordToken: token, resetPasswordExpires: expires });
+
+    const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
+    await sendResetPasswordEmail(user.email, resetUrl);
+
+    logger.info(`Reset de senha solicitado: user=${user.id}`);
+    res.json({ code: 200, msg: 'Link de recuperação enviado para seu email!' });
+  } catch (error) {
+    logger.error('Forgot password error:', error);
+    next(error);
+  }
+};
+
+const resetPassword = async (req, res, next) => {
+  try {
+    const { token, password } = req.body;
+    if (!token || !password) return res.status(400).json({ code: 400, msg: 'Token e senha são obrigatórios' });
+    if (password.length < 6) return res.status(400).json({ code: 400, msg: 'Senha deve ter pelo menos 6 caracteres' });
+
+    const user = await User.findOne({ where: { resetPasswordToken: token } });
+
+    if (!user || !user.resetPasswordExpires || new Date() > new Date(user.resetPasswordExpires)) {
+      return res.status(400).json({ code: 400, msg: 'Link inválido ou expirado. Solicite um novo.' });
+    }
+
+    await user.update({
+      password,
+      resetPasswordToken: null,
+      resetPasswordExpires: null,
+    });
+
+    logger.info(`Senha redefinida: user=${user.id}`);
+    res.json({ code: 200, msg: 'Senha alterada com sucesso! Faça login.' });
+  } catch (error) {
+    logger.error('Reset password error:', error);
+    next(error);
+  }
+};
+
+module.exports = { register, login, registerCheck, forgotPassword, resetPassword };
