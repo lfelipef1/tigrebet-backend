@@ -59,6 +59,7 @@ app.use(cors({
   origin: [
     process.env.FRONTEND_URL || 'http://localhost:3000',
     'https://tigrebet.roleplaymedellin.com.br',
+    'https://bet.roleplaymedellin.com.br',
     'http://127.0.0.1:3000',
     'http://localhost:3000'
   ],
