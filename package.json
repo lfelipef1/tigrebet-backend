@@ -1,0 +1,70 @@
+{
+  "name": "fortune-tiger-pro-backend",
+  "version": "2.0.0",
+  "description": "Enterprise-grade backend API for Fortune Tiger Pro Platform",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js",
+    "build": "echo 'No build step required for Node.js'",
+    "test": "jest --coverage",
+    "test:watch": "jest --watch",
+    "migrate": "node src/scripts/migrate.js",
+    "seed": "node src/scripts/seed.js",
+    "lint": "eslint src/ --ext .js",
+    "lint:fix": "eslint src/ --ext .js --fix"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "helmet": "^8.1.0",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "cookie-parser": "^1.4.7",
+    "express-rate-limit": "^8.4.1",
+    "express-validator": "^7.0.1",
+    "dotenv": "^16.4.1",
+    "winston": "^3.19.0",
+    "zod": "^4.3.6",
+    "pg": "^8.11.3",
+    "sequelize": "^6.37.8",
+    "ioredis": "^5.3.2",
+    "node-cron": "^3.0.3",
+    "multer": "^1.4.5-lts.1",
+    "sharp": "^0.33.1",
+    "nodemailer": "^6.9.8",
+    "mercadopago": "^2.0.8",
+    "ethers": "^6.8.1",
+    "bitcoinjs-lib": "^6.1.5",
+    "uuid": "^9.0.1",
+    "compression": "^1.7.4",
+    "express-mongo-sanitize": "^2.2.0",
+    "hpp": "^0.2.3",
+    "xss": "^1.0.14"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.3",
+    "jest": "^29.7.0",
+    "supertest": "^6.3.4",
+    "eslint": "^8.56.0",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^6.1.1"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "keywords": [
+    "gaming",
+    "casino",
+    "betting",
+    "enterprise",
+    "postgresql",
+    "redis",
+    "api"
+  ],
+  "author": "Fortune Tiger Pro Team",
+  "license": "PROPRIETARY"
+}
