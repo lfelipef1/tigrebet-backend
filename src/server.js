@@ -108,6 +108,14 @@ app.post('/api/v1/payment/webhook/mercadopago', paymentController.receiveWebhook
 // Caixa Premiada status (public — visitors can see current pot)
 app.get('/api/v1/caixa/status', apiLimiter, caixaController.getStatus);
 
+// Admin routes (protected by X-Admin-Key header, bypass JWT)
+app.get('/api/v1/admin/settings', adminController.getSettings);
+app.put('/api/v1/admin/settings/:game', adminController.updateSetting);
+app.get('/api/v1/admin/transactions', adminController.getTransactions);
+app.get('/api/v1/admin/stats', adminController.getStats);
+app.get('/api/v1/admin/users', adminController.getUsers);
+app.post('/api/v1/admin/reset-password', adminController.resetPassword);
+
 // Protected routes (require JWT)
 app.use('/api/v1', authenticate);
 
@@ -207,13 +215,6 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
-// Admin routes (protected by X-Admin-Key header, no JWT required)
-app.get('/api/v1/admin/settings', adminController.getSettings);
-app.put('/api/v1/admin/settings/:game', adminController.updateSetting);
-app.get('/api/v1/admin/transactions', adminController.getTransactions);
-app.get('/api/v1/admin/stats', adminController.getStats);
-app.get('/api/v1/admin/users', adminController.getUsers);
-app.post('/api/v1/admin/reset-password', adminController.resetPassword);
 
 // Error handling middleware (must be last)
 app.use(errorHandler);
