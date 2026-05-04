@@ -11,15 +11,15 @@ async function getAll() {
   try {
     const { GameSettings } = require('../models');
     const rows = await GameSettings.findAll();
-    if (rows.length === 0) {
-      // First boot: seed defaults
+    rows.forEach(r => { cache[r.game] = { rtp: r.rtp, isOpen: r.isOpen }; });
+    // Insert any games added after initial seed
+    const missing = GAMES.filter(g => !cache[g]);
+    if (missing.length > 0) {
       await GameSettings.bulkCreate(
-        GAMES.map(g => ({ game: g, rtp: 95, isOpen: true })),
+        missing.map(g => ({ game: g, rtp: 95, isOpen: true })),
         { ignoreDuplicates: true }
       );
-      GAMES.forEach(g => { cache[g] = { rtp: 95, isOpen: true }; });
-    } else {
-      rows.forEach(r => { cache[r.game] = { rtp: r.rtp, isOpen: r.isOpen }; });
+      missing.forEach(g => { cache[g] = { rtp: 95, isOpen: true }; });
     }
     lastFetch = now;
   } catch (e) {
