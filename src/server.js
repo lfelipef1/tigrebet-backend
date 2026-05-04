@@ -26,6 +26,7 @@ const kycController = require('./controllers/kycController');
 const missionController = require('./controllers/missionController');
 const caixaController = require('./controllers/caixaController');
 const scratchController = require('./controllers/scratchController');
+const doubleController = require('./controllers/doubleController');
 const adminController = require('./controllers/adminController');
 
 const app = express();
@@ -75,7 +76,7 @@ app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
 const authenticate = require('./middleware/auth');
-const { validate, registerSchema, loginSchema, wingoBetSchema, slotsBetSchema, minesweeperOrderSchema, envelopeOrderSchema, tigerBetSchema, crashBetSchema, plinkoBetSchema, caixaBetSchema, scratchBetSchema } = require('./validations');
+const { validate, registerSchema, loginSchema, wingoBetSchema, slotsBetSchema, minesweeperOrderSchema, envelopeOrderSchema, tigerBetSchema, crashBetSchema, plinkoBetSchema, caixaBetSchema, scratchBetSchema, doubleBetSchema } = require('./validations');
 
 // API v1 routes
 app.get('/api/v1/health', async (req, res) => {
@@ -152,6 +153,10 @@ app.post('/api/v1/minesweeper/reward', gameLimiter, minesweeperController.getRew
 
 // Scratch (Raspadinha) routes
 app.post('/api/v1/scratch/play', gameLimiter, validate(scratchBetSchema), scratchController.playScratch);
+
+// Double game routes
+app.get('/api/v1/double/status', apiLimiter, doubleController.getStatus);
+app.post('/api/v1/double/bet', gameLimiter, validate(doubleBetSchema), doubleController.placeBet);
 
 // Envelopes routes
 app.get('/api/v1/redenvelope/info', apiLimiter, envelopesController.getInfo);

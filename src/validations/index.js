@@ -89,6 +89,12 @@ const scratchBetSchema = z.object({
   coin: z.enum(['ETC', 'ETH', 'BTC'], 'Invalid coin type'),
 });
 
+const doubleBetSchema = z.object({
+  color: z.enum(['red', 'black', 'white'], 'Cor inválida'),
+  amount: z.number().min(1, 'Valor mínimo R$ 1'),
+  coin: z.enum(['ETC', 'ETH', 'BTC'], 'Invalid coin type'),
+});
+
 // Middleware factory for validation
 const validate = (schema) => {
   return (req, res, next) => {
@@ -126,5 +132,6 @@ module.exports = {
   plinkoBetSchema,
   caixaBetSchema,
   scratchBetSchema,
+  doubleBetSchema,
   validate,
 };
