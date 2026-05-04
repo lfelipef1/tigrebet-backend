@@ -2,6 +2,7 @@ const { User, Bet } = require('../models');
 const SecureRNG = require('../utils/rng');
 const { auditLogger } = require('../utils/auditLogger');
 const logger = require('../config/logger');
+const gsCache = require('../utils/gameSettings');
 
 const getCommonData = async (req, res, next) => {
   try {
@@ -37,6 +38,9 @@ const gameFetch = async (req, res, next) => {
 
 const placeBet = async (req, res, next) => {
   try {
+    const settings = await gsCache.get('wingo');
+    if (!settings.isOpen) return res.status(400).json({ code: 400, msg: 'Jogo temporariamente fechado' });
+
     const { period, select, amount, coin } = req.body;
     const user = req.user;
 
@@ -70,6 +74,8 @@ const placeBet = async (req, res, next) => {
     } else if (select === 'small' && result < 5) {
       goal = amount * 2;
     }
+
+    goal = parseFloat((goal * settings.rtp / 100).toFixed(2));
 
     if (goal > 0) {
       await user.increment(balanceField, { by: (goal - fee) });

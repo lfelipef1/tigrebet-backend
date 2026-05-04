@@ -2,10 +2,14 @@ const { User, Bet, Jackpot } = require('../models');
 const SecureRNG = require('../utils/rng');
 const ProvablyFair = require('../utils/provablyFair');
 const logger = require('../config/logger');
+const gsCache = require('../utils/gameSettings');
 
 const playTiger = async (req, res, next) => {
   console.log('\n[TIGER] ===== NEW PLAY REQUEST =====');
   try {
+    const settings = await gsCache.get('tiger');
+    if (!settings.isOpen) return res.status(400).json({ code: 400, msg: 'Jogo temporariamente fechado' });
+
     const { amount, coin } = req.body;
     const user = req.user;
 
@@ -94,6 +98,9 @@ const playTiger = async (req, res, next) => {
       totalWin *= 10;
       isTigerLuck = true;
     }
+
+    // Apply RTP factor
+    totalWin = parseFloat((totalWin * settings.rtp / 100).toFixed(2));
 
     console.log(`[TIGER] Step 4: Win=${totalWin} | WinLines=${JSON.stringify(winLines)} | TigerLuck=${isTigerLuck}`);
 

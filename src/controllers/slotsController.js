@@ -1,9 +1,13 @@
 const { User, Bet } = require('../models');
 const logger = require('../config/logger');
 const SecureRNG = require('../utils/rng');
+const gsCache = require('../utils/gameSettings');
 
 const playSlots = async (req, res, next) => {
   try {
+    const settings = await gsCache.get('slots');
+    if (!settings.isOpen) return res.status(400).json({ code: 400, msg: 'Jogo temporariamente fechado' });
+
     const { amount, coin } = req.body;
     const user = req.user;
     
@@ -42,6 +46,8 @@ const playSlots = async (req, res, next) => {
     if (reels[0][2] === reels[1][1] && reels[1][1] === reels[2][0]) {
       win += amount * symbolValues[reels[0][2]] * 2;
     }
+
+    win = parseFloat((win * settings.rtp / 100).toFixed(2));
 
     if (win > 0) {
       await user.increment(balanceField, { by: win });

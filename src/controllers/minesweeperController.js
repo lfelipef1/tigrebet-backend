@@ -2,6 +2,7 @@ const { Bet } = require('../models');
 const logger = require('../config/logger');
 const SecureRNG = require('../utils/rng');
 const crypto = require('crypto');
+const gsCache = require('../utils/gameSettings');
 
 // In-memory session store (short-lived game state)
 const sessions = new Map();
@@ -27,6 +28,9 @@ const GRID = 25; // 5x5
 const createOrder = async (req, res, next) => {
   console.log('[MINES] createOrder:', req.body);
   try {
+    const settings = await gsCache.get('mines');
+    if (!settings.isOpen) return res.status(400).json({ code: 400, msg: 'Jogo temporariamente fechado' });
+
     const { amount, mineCount, coin } = req.body;
     const user = req.user;
 
@@ -60,6 +64,7 @@ const createOrder = async (req, res, next) => {
       safeRevealed: 0,
       createdAt: Date.now(),
       active: true,
+      rtp: settings.rtp,
     });
 
     cleanupSessions();
@@ -166,7 +171,7 @@ const getReward = async (req, res, next) => {
     }
 
     const multiplier = calcMultiplier(session.safeRevealed, GRID, session.mineCount);
-    const winAmount = parseFloat((session.amount * multiplier).toFixed(2));
+    const winAmount = parseFloat((session.amount * multiplier * (session.rtp || 95) / 100).toFixed(2));
     const balanceField = session.balanceField;
 
     await user.increment(balanceField, { by: winAmount });

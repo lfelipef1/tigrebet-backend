@@ -1,14 +1,13 @@
 const { User, Bet } = require('../models');
 const logger = require('../config/logger');
 const SecureRNG = require('../utils/rng');
+const gsCache = require('../utils/gameSettings');
 
-/**
- * Crash Game Logic
- * In a real app, this would use WebSockets for real-time sync.
- * For this MVP, we'll simulate the "Crash" result.
- */
 const playCrash = async (req, res, next) => {
   try {
+    const settings = await gsCache.get('crash');
+    if (!settings.isOpen) return res.status(400).json({ code: 400, msg: 'Jogo temporariamente fechado' });
+
     const { amount, coin, autoCashout } = req.body;
     const user = req.user;
 
@@ -39,7 +38,7 @@ const playCrash = async (req, res, next) => {
 
     // If autoCashout is set and crashPoint is higher than autoCashout, user wins
     if (autoCashout && crashPoint >= autoCashout) {
-      win = amount * autoCashout;
+      win = parseFloat((amount * autoCashout * settings.rtp / 100).toFixed(2));
       finalMultiplier = autoCashout;
     }
 

@@ -7,6 +7,7 @@ const Achievement = require('./Achievement');
 const DailyMission = require('./DailyMission');
 const Jackpot = require('./Jackpot');
 const AuditLog = require('./AuditLog');
+const GameSettings = require('./GameSettings');
 
 // Associations
 User.hasMany(Transaction, { foreignKey: 'userId', as: 'transactions' });
@@ -101,5 +102,6 @@ module.exports = {
   DailyMission,
   Jackpot,
   AuditLog,
+  GameSettings,
   syncDatabase
 };

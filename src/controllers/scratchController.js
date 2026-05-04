@@ -1,6 +1,7 @@
 const { Bet } = require('../models');
 const logger = require('../config/logger');
 const SecureRNG = require('../utils/rng');
+const gsCache = require('../utils/gameSettings');
 
 // Scratch card symbols with prizes
 const SYMBOLS = [
@@ -72,6 +73,9 @@ function generateCard(betAmount) {
 const playScratch = async (req, res, next) => {
   console.log('[SCRATCH] New play:', req.body);
   try {
+    const settings = await gsCache.get('scratch');
+    if (!settings.isOpen) return res.status(400).json({ code: 400, msg: 'Jogo temporariamente fechado' });
+
     const { amount, coin } = req.body;
     const user = req.user;
 
@@ -86,7 +90,9 @@ const playScratch = async (req, res, next) => {
     await user.increment('totalWagered', { by: amount });
     await user.reload();
 
-    const { cells, winAmount, winSymbolId, winPositions } = generateCard(amount);
+    const raw = generateCard(amount);
+    const { cells, winSymbolId, winPositions } = raw;
+    const winAmount = parseFloat((raw.winAmount * settings.rtp / 100).toFixed(2));
 
     if (winAmount > 0) {
       await user.increment(balanceField, { by: winAmount });

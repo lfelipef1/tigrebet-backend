@@ -1,6 +1,7 @@
 const { Bet } = require('../models');
 const logger = require('../config/logger');
 const SecureRNG = require('../utils/rng');
+const gsCache = require('../utils/gameSettings');
 
 const MULTIPLIERS = {
   8:  [5.6, 2.1, 1.1, 1.0, 0.5, 1.0, 1.1, 2.1, 5.6],
@@ -11,6 +12,9 @@ const MULTIPLIERS = {
 const playPlinko = async (req, res, next) => {
   console.log('[PLINKO] New play:', req.body);
   try {
+    const settings = await gsCache.get('plinko');
+    if (!settings.isOpen) return res.status(400).json({ code: 400, msg: 'Jogo temporariamente fechado' });
+
     const { amount, coin, rows = 8 } = req.body;
     const user = req.user;
 
@@ -37,7 +41,7 @@ const playPlinko = async (req, res, next) => {
     }
 
     const multiplier = pyramidMultipliers[finalIndex];
-    const win = parseFloat((amount * multiplier).toFixed(2));
+    const win = parseFloat((amount * multiplier * settings.rtp / 100).toFixed(2));
 
     if (win > 0) {
       await user.increment(balanceField, { by: win });

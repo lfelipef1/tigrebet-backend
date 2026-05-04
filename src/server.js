@@ -26,6 +26,7 @@ const kycController = require('./controllers/kycController');
 const missionController = require('./controllers/missionController');
 const caixaController = require('./controllers/caixaController');
 const scratchController = require('./controllers/scratchController');
+const adminController = require('./controllers/adminController');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -206,30 +207,13 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
-// TEMP ADMIN — remove after use
-const ADMIN_KEY = 'tigrebet-admin-2026';
-app.get('/api/v1/admin/users', async (req, res) => {
-  if (req.headers['x-admin-key'] !== ADMIN_KEY) return res.status(403).json({ msg: 'Forbidden' });
-  try {
-    const { User } = require('./models');
-    const users = await User.findAll({ attributes: ['id','mobile','createdAt','balanceETC'], order: [['createdAt','DESC']] });
-    res.json({ count: users.length, users });
-  } catch (e) { res.status(500).json({ msg: e.message }); }
-});
-app.post('/api/v1/admin/reset-password', async (req, res) => {
-  if (req.headers['x-admin-key'] !== ADMIN_KEY) return res.status(403).json({ msg: 'Forbidden' });
-  try {
-    const { User } = require('./models');
-    const bcrypt = require('bcryptjs');
-    const { mobile, newPassword } = req.body;
-    const user = await User.findOne({ where: { mobile } });
-    if (!user) return res.status(404).json({ msg: 'Usuário não encontrado' });
-    user.password = await bcrypt.hash(newPassword, 10);
-    await user.save();
-    res.json({ msg: `Senha do ${mobile} alterada com sucesso` });
-  } catch (e) { res.status(500).json({ msg: e.message }); }
-});
-// END TEMP ADMIN
+// Admin routes (protected by X-Admin-Key header, no JWT required)
+app.get('/api/v1/admin/settings', adminController.getSettings);
+app.put('/api/v1/admin/settings/:game', adminController.updateSetting);
+app.get('/api/v1/admin/transactions', adminController.getTransactions);
+app.get('/api/v1/admin/stats', adminController.getStats);
+app.get('/api/v1/admin/users', adminController.getUsers);
+app.post('/api/v1/admin/reset-password', adminController.resetPassword);
 
 // Error handling middleware (must be last)
 app.use(errorHandler);
