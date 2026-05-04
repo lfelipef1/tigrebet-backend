@@ -38,7 +38,7 @@ app.use(helmet({
       styleSrc: ["'self'", "'unsafe-inline'"],
       scriptSrc: ["'self'"],
       imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'", process.env.FRONTEND_URL || 'http://localhost:3000', 'http://127.0.0.1:3000'],
+      connectSrc: ["'self'", process.env.FRONTEND_URL || 'http://localhost:3000', 'https://bet.roleplaymedellin.com.br', 'https://tigrebet.roleplaymedellin.com.br', 'https://backend-production-9f2a.up.railway.app', 'http://127.0.0.1:3000'],
       fontSrc: ["'self'"],
       objectSrc: ["'none'"],
       mediaSrc: ["'self'"],
