@@ -243,4 +243,18 @@ const resetPassword = async (req, res, next) => {
   }
 };
 
-module.exports = { register, login, registerCheck, forgotPassword, resetPassword };
+const changePassword = async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) return res.status(400).json({ code: 400, msg: 'Campos obrigatórios' });
+    if (newPassword.length < 6) return res.status(400).json({ code: 400, msg: 'Nova senha deve ter pelo menos 6 caracteres' });
+    const isValid = await comparePassword(currentPassword, req.user.password);
+    if (!isValid) return res.status(400).json({ code: 400, msg: 'Senha atual incorreta' });
+    await req.user.update({ password: newPassword });
+    res.json({ code: 200, msg: 'Senha alterada com sucesso!' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = { register, login, registerCheck, forgotPassword, resetPassword, changePassword };

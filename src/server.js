@@ -120,6 +120,7 @@ app.post('/api/v1/admin/reset-password', adminController.resetPassword);
 app.use('/api/v1', authenticate);
 
 app.post('/api/v1/register_check', apiLimiter, authController.registerCheck);
+app.post('/api/v1/auth/change-password', apiLimiter, authController.changePassword);
 
 // Wingo game routes
 app.get('/api/v1/wingo/common_data', apiLimiter, wingoController.getCommonData);
