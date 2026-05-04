@@ -1,4 +1,4 @@
-const GAMES = ['tiger', 'crash', 'mines', 'plinko', 'slots', 'wingo', 'scratch', 'double'];
+const GAMES = ['tiger', 'crash', 'mines', 'plinko', 'slots', 'wingo', 'scratch', 'double', 'caixa'];
 
 // In-memory cache, refreshed every 10 seconds
 let cache = {};
